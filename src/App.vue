@@ -1,19 +1,22 @@
 <template>
   <div id="home">
     <div>
+      <button @click="toHome">Home</button>
       <button v-if="loginType == false" @click="showSignPage(1)">
         Sign in
       </button>
       <button v-if="loginType == false" @click="showSignPage(2)">
         Sign up
       </button>
-      <button v-if="loginType">Individule profile</button>
+      <button v-if="loginType" @click="toUserInfo">Individule profile</button>
       <button v-if="loginType" @click="showSignPage(3)">Update</button>
       <button v-if="loginType" @click="logout">Logout</button>
       <div class="header">
         <h4>{{ siteinfo.sitename }}</h4>
         <img :src="siteinfo.icon" alt="" />
       </div>
+      <!-- 绑定传值， 父向子，通过v-bind 绑定父级变量，再通过props传向子组件 -->
+      <Test :setName="editTestUsername" />
       <hr />
       <div class="content">
         <div class="menu">
@@ -31,7 +34,11 @@
           <div>{{ choosed_text }}</div>
           <hr />
 
-          <router-view />
+          <router-view
+            @editTestName="editName"
+            @hideBox="hideSignPage"
+            @changeUI="changeLoginType"
+          />
         </div>
       </div>
       <hr />
@@ -48,10 +55,11 @@
 <script>
 import axios from "axios";
 import LoginBox from "../src/components/LoginBox.vue";
-
+import Test from "../src/components/test.vue";
 export default {
   components: {
     LoginBox,
+    Test,
   },
   data() {
     return {
@@ -61,19 +69,10 @@ export default {
       box_target: 0,
       siteinfo: {},
       loginType: false,
+      editTestUsername: "",
     };
   },
   mounted() {
-    try {
-      const token = window.localStorage.getItem("token");
-      console.log(!!token);
-      const flag = !!token;
-      if (flag) {
-        this.loginType = true;
-      }
-    } catch (error) {
-      console.log(error);
-    }
     this.getMenuList();
   },
   methods: {
@@ -109,7 +108,34 @@ export default {
       // 清除所有的local storage
       // windon.localStorge.removeItem('token')
       window.localStorage.clear();
-      window.location.reload();
+      this.changeLoginType();
+      this.$router.push({ path: "/" });
+      // window.location.reload();
+    },
+    toUserInfo() {
+      this.$router.push({ path: "/userinfo" });
+    },
+    toHome() {
+      this.$router.push({ path: "/" });
+    },
+    changeLoginType(info) {
+      console.log(info);
+      try {
+        const token = window.localStorage.getItem("token");
+        console.log("token: " + !!token);
+        const flag = !!token;
+        if (flag) {
+          this.loginType = true;
+        } else {
+          this.loginType = false;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    editName(name) {
+      this.editTestUsername = name;
+      console.log(this.editTestUsername);
     },
   },
 };

@@ -101,7 +101,14 @@ export default {
               console.log("successful login");
               console.log(res.data);
               window.localStorage.setItem("token", res.data.token);
-              window.location.reload();
+              //   window.location.reload();
+              //   开始使用vuex存储用户的个人信息
+              var userinfo = res.data.userinfo;
+              console.log(userinfo);
+              this.$store.commit("editUserInfo", userinfo);
+              if (this.$router.path != "/userinfo") {
+                this.$router.push({ path: "/userinfo" });
+              }
           }
         });
       } else {
